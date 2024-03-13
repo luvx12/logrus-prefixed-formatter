@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"regexp"
 	"runtime"
 	"sort"
@@ -343,9 +344,9 @@ func (f *TextFormatter) printColored(b *bytes.Buffer, entry *logrus.Entry, keys 
 
 		coloredTimestamp := colorScheme.TimestampColor(timestamp)
 		if message == "" {
-			fmt.Fprintf(b, "%s %s%s" + prefixFormat, coloredTimestamp, level, caller, prefix)
+			fmt.Fprintf(b, "%s%s%s" + prefixFormat, coloredTimestamp, level, caller, prefix)
 		} else {
-			fmt.Fprintf(b, "%s %s%s" + prefixFormat + " " + messageFormat, coloredTimestamp, level, caller, prefix, message)
+			fmt.Fprintf(b, "%s%s%s" + prefixFormat + " " + messageFormat, coloredTimestamp, level, caller, prefix, message)
 		}
 	}
 
@@ -374,7 +375,7 @@ func (f *TextFormatter) needsQuoting(text string) bool {
 
 func extractCallerInfo(caller *runtime.Frame) (string, string) {
 	funcVal := caller.Function
-	fileVal := fmt.Sprintf("%s:%d", caller.File, caller.Line)
+	fileVal := fmt.Sprintf("%s:%d", path.Base(caller.File), caller.Line)
 	return funcVal, fileVal
 }
 
