@@ -31,6 +31,7 @@ var (
 		DebugLevelStyle: "blue",
 		PrefixStyle:     "cyan",
 		TimestampStyle:  "black+h",
+		MessageStyle:    "gray",
 	}
 	noColorsColorScheme *compiledColorScheme = &compiledColorScheme{
 		InfoLevelColor:  ansi.ColorFunc(""),
@@ -43,7 +44,7 @@ var (
 		TimestampColor:  ansi.ColorFunc(""),
 	}
 	defaultCompiledColorScheme *compiledColorScheme = compileColorScheme(defaultColorScheme)
-	extractPrefixRegex = regexp.MustCompile("^\\[(.*?)\\]")
+	extractPrefixRegex                              = regexp.MustCompile("^\\[(.*?)\\]")
 )
 
 func miniTS() int {
@@ -59,6 +60,7 @@ type ColorScheme struct {
 	DebugLevelStyle string
 	PrefixStyle     string
 	TimestampStyle  string
+	MessageStyle    string
 }
 
 type compiledColorScheme struct {
@@ -70,6 +72,7 @@ type compiledColorScheme struct {
 	DebugLevelColor func(string) string
 	PrefixColor     func(string) string
 	TimestampColor  func(string) string
+	MessageColor    func(string) string
 }
 
 type TextFormatter struct {
@@ -155,6 +158,7 @@ func compileColorScheme(s *ColorScheme) *compiledColorScheme {
 		DebugLevelColor: getCompiledColor(s.DebugLevelStyle, defaultColorScheme.DebugLevelStyle),
 		PrefixColor:     getCompiledColor(s.PrefixStyle, defaultColorScheme.PrefixStyle),
 		TimestampColor:  getCompiledColor(s.TimestampStyle, defaultColorScheme.TimestampStyle),
+		MessageColor:    getCompiledColor(s.MessageStyle, defaultColorScheme.MessageStyle),
 	}
 }
 
@@ -324,29 +328,29 @@ func (f *TextFormatter) printColored(b *bytes.Buffer, entry *logrus.Entry, keys 
 		if f.CallerFormatter != nil {
 			caller = f.CallerFormatter(funcVal, fileVal)
 		} else {
-			caller = fmt.Sprintf(" (%s: %s)", fileVal, funcVal)
+			caller = fmt.Sprintf(" %s %s", fileVal, funcVal)
 		}
 	}
 
 	if f.DisableTimestamp {
 		if message == "" {
-			fmt.Fprintf(b, "%s%s"+ prefixFormat, level, caller, prefix)
+			fmt.Fprintf(b, "%s%s"+prefixFormat, level, caller, prefix)
 		} else {
-			fmt.Fprintf(b, "%s%s"+ prefixFormat + " " + messageFormat, level, caller, prefix, message)
+			fmt.Fprintf(b, "%s%s"+prefixFormat+" "+messageFormat, level, caller, prefix, message)
 		}
 	} else {
 		var timestamp string
 		if !f.FullTimestamp {
-			timestamp = fmt.Sprintf("[%04d]", miniTS())
+ 			timestamp = fmt.Sprintf("%04d", miniTS())
 		} else {
-			timestamp = fmt.Sprintf("[%s]", entry.Time.Format(timestampFormat))
+			timestamp = fmt.Sprintf("%s", entry.Time.Format(timestampFormat))
 		}
 
 		coloredTimestamp := colorScheme.TimestampColor(timestamp)
 		if message == "" {
-			fmt.Fprintf(b, "%s%s%s" + prefixFormat, coloredTimestamp, level, caller, prefix)
+			fmt.Fprintf(b, "%s %s%s"+prefixFormat, coloredTimestamp, level, caller, prefix)
 		} else {
-			fmt.Fprintf(b, "%s%s%s" + prefixFormat + " " + messageFormat, coloredTimestamp, level, caller, prefix, message)
+			fmt.Fprintf(b, "%s %s%s"+prefixFormat+" "+messageFormat, coloredTimestamp, level, caller, prefix, colorScheme.MessageColor(message))
 		}
 	}
 
