@@ -329,9 +329,9 @@ func (f *TextFormatter) printColored(b *bytes.Buffer, entry *logrus.Entry, keys 
 
 	if f.DisableTimestamp {
 		if message == "" {
-			fmt.Fprintf(b, "%s"+ prefixFormat, level, prefix)
+			fmt.Fprintf(b, "%s%s"+ prefixFormat, level, caller, prefix)
 		} else {
-			fmt.Fprintf(b, "%s"+ prefixFormat + " " + messageFormat, level, prefix, message)
+			fmt.Fprintf(b, "%s%s"+ prefixFormat + " " + messageFormat, level, caller, prefix, message)
 		}
 	} else {
 		var timestamp string
@@ -343,9 +343,9 @@ func (f *TextFormatter) printColored(b *bytes.Buffer, entry *logrus.Entry, keys 
 
 		coloredTimestamp := colorScheme.TimestampColor(timestamp)
 		if message == "" {
-			fmt.Fprintf(b, "%s %s" + prefixFormat, coloredTimestamp, level, prefix)
+			fmt.Fprintf(b, "%s %s%s" + prefixFormat, coloredTimestamp, level, caller, prefix)
 		} else {
-			fmt.Fprintf(b, "%s %s" + prefixFormat + " " + messageFormat, coloredTimestamp, level, prefix, message)
+			fmt.Fprintf(b, "%s %s%s" + prefixFormat + " " + messageFormat, coloredTimestamp, level, caller, prefix, message)
 		}
 	}
 
