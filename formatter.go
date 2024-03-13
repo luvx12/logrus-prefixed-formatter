@@ -42,6 +42,7 @@ var (
 		DebugLevelColor: ansi.ColorFunc(""),
 		PrefixColor:     ansi.ColorFunc(""),
 		TimestampColor:  ansi.ColorFunc(""),
+		MessageColor:    ansi.ColorFunc(""),
 	}
 	defaultCompiledColorScheme *compiledColorScheme = compileColorScheme(defaultColorScheme)
 	extractPrefixRegex                              = regexp.MustCompile("^\\[(.*?)\\]")
@@ -336,7 +337,7 @@ func (f *TextFormatter) printColored(b *bytes.Buffer, entry *logrus.Entry, keys 
 		if message == "" {
 			fmt.Fprintf(b, "%s%s"+prefixFormat, level, caller, prefix)
 		} else {
-			fmt.Fprintf(b, "%s%s"+prefixFormat+" "+messageFormat, level, caller, prefix, message)
+			fmt.Fprintf(b, "%s%s"+prefixFormat+" "+messageFormat, level, caller, prefix, colorScheme.MessageColor(message))
 		}
 	} else {
 		var timestamp string
